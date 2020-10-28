@@ -7,43 +7,44 @@ std::unique_ptr<T> make_unique(Args&&... args) {
 
 template <typename T>
 Bifurcation<T>::Bifurcation(int argc, char* argv[])
-     :T( argc, argv)
+    :T( argc, argv)
 {
-     print_section_name("READING BIFURCATION PARAMETERS");
-     bif_params = new IOdictionary
-         (IOobject
-         (
-             "BIFURCATIONdict",
-             T::_runTime().system(),
-             T::_mesh(),
-             IOobject::MUST_READ,
-             IOobject::AUTO_WRITE
-         )
-         );
-     Info<<"\n";
-     mu_inf = bif_params->lookupOrDefault<scalar>("mu_inf", 2);
-     mu_sup = bif_params->lookupOrDefault<scalar>("mu_sup", 0.2);
-     N_mu = bif_params->lookupOrDefault<scalar>("N_mu", 100);
-     Info<<"RANGE:                           mu_inf="<<mu_inf<<"         "<<"mu_sup="<<mu_sup<<endl;
-     Info<<"Number of snapshot for POD:        N_mu="<<N_mu<<endl;
-     x_cord = bif_params->lookupOrDefault<scalar>("x_cord", 14);
-     y_cord = bif_params->lookupOrDefault<scalar>("y_cord", 1.25);
-     field  =bif_params->lookupOrDefault<word>("field","velocity");
-     word coord  =bif_params->lookupOrDefault<word>("component","x");
-     id_cell=T::_mesh().findCell(point(x_cord,y_cord,0));
-     if(id_cell<0)
-     {
-           Info<<"Error:         Coordinate not belonging to the mesh"<<endl;
-           Foam::FatalError.exit();
-     }
+    print_section_name("READING BIFURCATION PARAMETERS");
+    bif_params = new IOdictionary
+    (IOobject
+     (
+         "BIFURCATIONdict",
+         T::_runTime().system(),
+         T::_mesh(),
+         IOobject::MUST_READ,
+         IOobject::AUTO_WRITE
+     )
+    );
+    Info<<"\n";
+    mu_inf = bif_params->lookupOrDefault<scalar>("mu_inf", 2);
+    mu_sup = bif_params->lookupOrDefault<scalar>("mu_sup", 0.2);
+    N_mu = bif_params->lookupOrDefault<scalar>("N_mu", 100);
+    Info<<"RANGE:                           mu_inf="<<mu_inf<<"         "<<"mu_sup="<<mu_sup<<endl;
+    Info<<"Number of snapshot for POD:        N_mu="<<N_mu<<endl;
+    x_cord = bif_params->lookupOrDefault<scalar>("x_cord", 14);
+    y_cord = bif_params->lookupOrDefault<scalar>("y_cord", 1.25);
+    field  =bif_params->lookupOrDefault<word>("field","velocity");
+    word coord  =bif_params->lookupOrDefault<word>("component","x");
+    lift_keyword = bif_params->lookupOrDefault<word>("lift","snapshot");
+    id_cell=T::_mesh().findCell(point(x_cord,y_cord,0));
+    if(id_cell<0)
+    {
+        Info<<"Error:         Coordinate not belonging to the mesh"<<endl;
+        Foam::FatalError.exit();
+    }
     Info<<"==========================================================================="<<endl;
     Info<<"Coordinate of the sampling point:            (x="<<x_cord<<";y="<<y_cord<<")"<<endl;
     std::vector<std::string> available_fields{"velocity","pressure"};
     if(find(available_fields.begin(),available_fields.end(),field)==available_fields.end())
-     {
-           Info<<"Error:        given field not available, possible assignment:\n-pressure\n-velocity "<<endl;
-           Foam::FatalError.exit();
-     }
+    {
+        Info<<"Error:        given field not available, possible assignment:\n-pressure\n-velocity "<<endl;
+        Foam::FatalError.exit();
+    }
     else
         Info<<"Field to be sampled:      "<<field<<endl;
 
@@ -51,10 +52,14 @@ Bifurcation<T>::Bifurcation(int argc, char* argv[])
     {
         std::map<std::string, int> map_coord_component{{"x",0},{"y",1},{"z",2}};
         component=map_coord_component[coord];
-        sampling=[this](){return this->sampling_velocity(id_cell,component);};
+        sampling=[this]() {
+            return this->sampling_velocity(id_cell,component);
+        };
     }
     else
-        sampling=[this](){return this->sampling_pressure(id_cell);};
+        sampling=[this]() {
+        return this->sampling_pressure(id_cell);
+    };
 
     T::Pnumber=1;
     T::Tnumber=N_mu;
@@ -73,65 +78,66 @@ Bifurcation<T>::Bifurcation(int argc, char* argv[])
 template <typename T>
 void Bifurcation<T>::offlineSolve()
 {
-         print_section_name("OFFLINE SOLVE"); List<scalar> mu_now(1);
-         // if the offline solution is already performed read the fields
-         if (T::offline)
-         {
-             ITHACAstream::read_fields(T::Ufield,"U", "./ITHACAoutput/Offline/");
-             ITHACAstream::read_fields(T::Pfield,"p", "./ITHACAoutput/Offline/");
-         }
+    print_section_name("OFFLINE SOLVE");
+    List<scalar> mu_now(1);
+    // if the offline solution is already performed read the fields
+    if (T::offline)
+    {
+        ITHACAstream::read_fields(T::Ufield,"U", "./ITHACAoutput/Offline/");
+        ITHACAstream::read_fields(T::Pfield,"p", "./ITHACAoutput/Offline/");
+    }
 
-         else
-         {
-             for (label i = 0; i < mu.cols(); i++)
-             {
-                 mu_now[0] = mu(0, i);
-                 T::change_viscosity(mu(0, i));
-                 T::truthSolve(mu_now);
-                 sampled_field(i)=sampling();
-             }
-             ITHACAstream::exportVector(sampled_field,"sampled_field","eigen","./ITHACAoutput/Offline");
-         }
+    else
+    {
+        for (label i = 0; i < mu.cols(); i++)
+        {
+            mu_now[0] = mu(0, i);
+            T::change_viscosity(mu(0, i));
+            T::truthSolve(mu_now);
+            sampled_field(i)=sampling();
+        }
+        ITHACAstream::exportVector(sampled_field,"sampled_field","eigen","./ITHACAoutput/Offline");
+    }
 
 };
 
 template <typename T>
 void Bifurcation<T>::prepare_POD(void)
 {
-         T::restart();
-         T::solvesupremizer();
-         ITHACAparameters* para = ITHACAparameters::getInstance(this->_mesh(),
-                              this->_runTime());
-         T::NUmodesOut = para->ITHACAdict->lookupOrDefault<scalar>("NmodesUout", 15);
-         T::NPmodesOut = para->ITHACAdict->lookupOrDefault<scalar>("NmodesPout", 15);
-         T::NSUPmodesOut = para->ITHACAdict->lookupOrDefault<scalar>("NmodesSUPout", 15);
-         T::NUmodes = para->ITHACAdict->lookupOrDefault<scalar>("NmodesUproj", 10);
-         T::NPmodes = para->ITHACAdict->lookupOrDefault<scalar>("NmodesPproj", 10);
-         T::NSUPmodes = para->ITHACAdict->lookupOrDefault<scalar>("NmodesSUPproj", 10);
-         if (T::bcMethod == "lift")
-              {
-                  lift_solve();
-                  ITHACAutilities::normalizeFields(T::liftfield);
-                  // Homogenize the snapshots
-                  T::computeLift(T::Ufield, T::liftfield, T::Uomfield);
-                  // Perform POD on the velocity snapshots
-                  ITHACAPOD::getModes(T::Uomfield, T::Umodes, T::_U().name(),
-                                      T::podex, 0, 0, T::NUmodesOut);
-              }
+    T::restart();
+    T::solvesupremizer();
+    ITHACAparameters* para = ITHACAparameters::getInstance(this->_mesh(),
+                             this->_runTime());
+    T::NUmodesOut = para->ITHACAdict->lookupOrDefault<scalar>("NmodesUout", 15);
+    T::NPmodesOut = para->ITHACAdict->lookupOrDefault<scalar>("NmodesPout", 15);
+    T::NSUPmodesOut = para->ITHACAdict->lookupOrDefault<scalar>("NmodesSUPout", 15);
+    T::NUmodes = para->ITHACAdict->lookupOrDefault<scalar>("NmodesUproj", 10);
+    T::NPmodes = para->ITHACAdict->lookupOrDefault<scalar>("NmodesPproj", 10);
+    T::NSUPmodes = para->ITHACAdict->lookupOrDefault<scalar>("NmodesSUPproj", 10);
+    if (T::bcMethod == "lift")
+    {
+        lift_solve();
+        ITHACAutilities::normalizeFields(T::liftfield);
+        // Homogenize the snapshots
+        T::computeLift(T::Ufield, T::liftfield, T::Uomfield);
+        // Perform POD on the velocity snapshots
+        ITHACAPOD::getModes(T::Uomfield, T::Umodes, T::_U().name(),
+                            T::podex, 0, 0, T::NUmodesOut);
+    }
 
-              else
-              {
-                  ITHACAPOD::getModes(T::Ufield, T::Umodes, T::_U().name(),
-                                      T::podex, 0, 0, T::NUmodesOut);
-              }
+    else
+    {
+        ITHACAPOD::getModes(T::Ufield, T::Umodes, T::_U().name(),
+                            T::podex, 0, 0, T::NUmodesOut);
+    }
 
-              // Perform POD on velocity pressure and supremizers and store the first 10 modes
-              ITHACAPOD::getModes(T::Pfield, T::Pmodes, T::_p().name(),
-                                  T::podex, 0, 0,
-                                  T::NPmodesOut);
-              ITHACAPOD::getModes(T::supfield, T::supmodes, T::_U().name(),
-                                  T::podex,
-                                  T::supex, 1, T::NSUPmodesOut);
+    // Perform POD on velocity pressure and supremizers and store the first 10 modes
+    ITHACAPOD::getModes(T::Pfield, T::Pmodes, T::_p().name(),
+                        T::podex, 0, 0,
+                        T::NPmodesOut);
+    ITHACAPOD::getModes(T::supfield, T::supmodes, T::_U().name(),
+                        T::podex,
+                        T::supex, 1, T::NSUPmodesOut);
 }
 
 
@@ -152,9 +158,9 @@ scalar Bifurcation<T>::sampling_velocity(label id_cell,label component)
 template <typename T>
 void Bifurcation<T>::print_section_name(const std::string & title) const
 {
-     Info<<"==========================================================================="<<endl;
-     Info<<"             "<<title<<endl;
-     Info<<"==========================================================================="<<endl;
+    Info<<"==========================================================================="<<endl;
+    Info<<"             "<<title<<endl;
+    Info<<"==========================================================================="<<endl;
 }
 
 
@@ -163,90 +169,108 @@ void Bifurcation<T>::print_section_name(const std::string & title) const
 template <typename T>
 void Bifurcation<T>::lift_solve()
 {
-    print_section_name("SOLVING LIFTING PROBLEM");
-    surfaceScalarField& phi =T::_phi();
-    volScalarField& p = T::_p0();
-    volVectorField& U = T::_U0();
-    IOMRFZoneList& MRF = T::_MRF();
-    Time& runTime = T::_runTime();
-    fvMesh& mesh = T::_mesh();
-    label BCind = T::inletIndex(0, 0);
-    volVectorField Ulift("Ulift",U);
-    instantList Times = runTime.times();
-    runTime.setTime(Times[1], 1);
-    pisoControl potentialFlow(mesh, "potentialFlow");
-    Vector<double> v0(0, 0, 0);
-
-    for (label j = 0; j < U.boundaryField().size(); j++)
+    if (lift_keyword=="potential")
     {
-        if (j!=BCind)
+        print_section_name("SOLVING LIFTING PROBLEM");
+        surfaceScalarField& phi =T::_phi();
+        volScalarField& p = T::_p0();
+        volVectorField& U = T::_U0();
+        IOMRFZoneList& MRF = T::_MRF();
+        Time& runTime = T::_runTime();
+        fvMesh& mesh = T::_mesh();
+        label BCind = T::inletIndex(0, 0);
+        volVectorField Ulift("Ulift",U);
+        instantList Times = runTime.times();
+        runTime.setTime(Times[1], 1);
+        pisoControl potentialFlow(mesh, "potentialFlow");
+        Vector<double> v0(0, 0, 0);
+
+        for (label j = 0; j < U.boundaryField().size(); j++)
         {
-            T::assignBC(Ulift, j, v0);
+            if (j!=BCind)
+            {
+                T::assignBC(Ulift, j, v0);
+            }
         }
-    }
-    T::assignIF(Ulift, v0);
-    phi = linearInterpolate(Ulift) & mesh.Sf();
+        T::assignIF(Ulift, v0);
+        phi = linearInterpolate(Ulift) & mesh.Sf();
 
-    Info << "Constructing velocity potential field Phi\n" << endl;
+        Info << "Constructing velocity potential field Phi\n" << endl;
 
-    volScalarField Phi
-    (
-        IOobject
+        volScalarField Phi
         (
-            "Phi",
-            runTime.timeName(),
+            IOobject
+            (
+                "Phi",
+                runTime.timeName(),
+                mesh,
+                IOobject::READ_IF_PRESENT,
+                IOobject::NO_WRITE
+            ),
             mesh,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("Phi", dimLength * dimVelocity, 0),
-        p.boundaryField().types()
-    );
-    label PhiRefCell = 0;
-    scalar PhiRefValue = 0;
-    setRefCell
-    (
-        Phi,
-        potentialFlow.dict(),
-        PhiRefCell,
-        PhiRefValue
-    );
-    mesh.setFluxRequired(Phi.name());
-    runTime.functionObjects().start();
-    MRF.makeRelative(phi);
-    adjustPhi(phi, Ulift, p);
-
-    while (potentialFlow.correctNonOrthogonal())
-    {
-        fvScalarMatrix PhiEqn
-        (
-            fvm::laplacian(dimensionedScalar("1", dimless, 1), Phi)
-            ==
-            fvc::div(phi)
+            dimensionedScalar("Phi", dimLength * dimVelocity, 0),
+            p.boundaryField().types()
         );
-        PhiEqn.setReference(PhiRefCell, PhiRefValue);
-        PhiEqn.solve();
+        label PhiRefCell = 0;
+        scalar PhiRefValue = 0;
+        setRefCell
+        (
+            Phi,
+            potentialFlow.dict(),
+            PhiRefCell,
+            PhiRefValue
+        );
+        mesh.setFluxRequired(Phi.name());
+        runTime.functionObjects().start();
+        MRF.makeRelative(phi);
+        adjustPhi(phi, Ulift, p);
 
-        if (potentialFlow.finalNonOrthogonalIter())
+        while (potentialFlow.correctNonOrthogonal())
         {
-            phi -= PhiEqn.flux();
+            fvScalarMatrix PhiEqn
+            (
+                fvm::laplacian(dimensionedScalar("1", dimless, 1), Phi)
+                ==
+                fvc::div(phi)
+            );
+            PhiEqn.setReference(PhiRefCell, PhiRefValue);
+            PhiEqn.solve();
+
+            if (potentialFlow.finalNonOrthogonalIter())
+            {
+                phi -= PhiEqn.flux();
+            }
+        }
+
+        MRF.makeAbsolute(phi);
+        Info << "Continuity error = "
+             << mag(fvc::div(phi))().weightedAverage(mesh.V()).value()
+             << endl;
+        Ulift = fvc::reconstruct(phi);
+        Ulift.correctBoundaryConditions();
+        Info << "Interpolated velocity error = "
+             << (sqrt(sum(sqr((fvc::interpolate(U) & mesh.Sf()) - phi)))
+                 / sum(mesh.magSf())).value()
+             << endl;
+        T::liftfield.append(Ulift);
+    }
+    else if (lift_keyword=="snapshot")
+    {
+        bool check_lift=ITHACAutilities::check_folder("Lift");
+        if (check_lift)
+        {
+            Info<<"Lifting function already exist: reading from folder \"./Lift/\""<<endl;
+            ITHACAstream::read_fields(this->liftfield, T::_U(), "./Lift/");
+        }
+        else
+        {
+            //in questo caso non abbiamo la cartella lift quindi la devo creare e devo anche prendere
+            //uno snapshot da usare come lift function
+            Info<<"\"Lift\" folder not found, creating \"./Lift/\" from first snapshot"<<endl;
+            ITHACAutilities::createSymLink("./Lift");
+            volVectorField& Ulift(T::Ufield[0]);
+            T::liftfield.append(Ulift);
+            ITHACAstream::exportSolution(Ulift, "1", "./Lift/");
         }
     }
-
-    MRF.makeAbsolute(phi);
-    Info << "Continuity error = "
-         << mag(fvc::div(phi))().weightedAverage(mesh.V()).value()
-         << endl;
-    Ulift = fvc::reconstruct(phi);
-    Ulift.correctBoundaryConditions();
-    Info << "Interpolated velocity error = "
-         << (sqrt(sum(sqr((fvc::interpolate(U) & mesh.Sf()) - phi)))
-             / sum(mesh.magSf())).value()
-         << endl;
-    Ulift.write();
-    T::liftfield.append(Ulift);
 }
-
-
-

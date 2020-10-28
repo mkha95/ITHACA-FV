@@ -40,37 +40,42 @@ SourceFiles
 template <typename T>
 class Bifurcation:public T
 {
-    private:
-        IOdictionary* bif_params;
-        //mu range for the bifurcation diagram
-        scalar mu_inf;
-        scalar mu_sup;
-        label N_mu;
-        // id of the cell corresponding to the position we want to sample
-        label id_cell;
-        // physical_quantity for retriving the bifurcation diagram
-        word field;
-        scalar x_cord;
-        scalar y_cord;
-        label component;
-        using T::mu;
-        using T::mu_range;
-        //Eigen::MatrixXd & mu=T::mu;
-        scalar sampling_velocity(label id_cell,label component);
-        scalar sampling_pressure(label id_cell);
-        std::function<scalar(void)> sampling;
-        void print_section_name(const std::string &) const;
-        Eigen::VectorXd sampled_field;
-        void lift_solve();
+private:
+    IOdictionary* bif_params;
+    //mu range for the bifurcation diagram
+    scalar mu_inf;
+    scalar mu_sup;
+    label N_mu;
+    // id of the cell corresponding to the position we want to sample
+    label id_cell;
+    // physical_quantity for retriving the bifurcation diagram
+    word field;
+    scalar x_cord;
+    scalar y_cord;
+    label component;
+    using T::mu;
+    using T::mu_range;
+    //Eigen::MatrixXd & mu=T::mu;
+    scalar sampling_velocity(label id_cell,label component);
+    scalar sampling_pressure(label id_cell);
+    std::function<scalar(void)> sampling;
+    void print_section_name(const std::string &) const;
+    Eigen::VectorXd sampled_field;
+    word lift_keyword;
 
-    public:
-        void print_mu(){Info<<mu<<endl;};
-        Bifurcation()   {T();}
-        Bifurcation(int argc, char* argv[]);
-        ~Bifurcation()=default;
-        void offlineSolve();
-        void prepare_POD();
-        //void print_bifurcation() const;
+public:
+    void lift_solve();
+    void print_mu() {
+        Info<<mu<<endl;
+    };
+    Bifurcation()   {
+        T();
+    }
+    Bifurcation(int argc, char* argv[]);
+    ~Bifurcation()=default;
+    void offlineSolve();
+    void prepare_POD();
+    //void print_bifurcation() const;
 };
 
 #include "bifurcation_NSS_imp.H"
