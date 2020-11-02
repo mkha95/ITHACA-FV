@@ -117,9 +117,10 @@ void Bifurcation<T>::prepare_POD(void)
     if (T::bcMethod == "lift")
     {
         lift_solve();
-        ITHACAutilities::normalizeFields(T::liftfield);
+        //ITHACAutilities::normalizeFields(T::liftfield);
         // Homogenize the snapshots
-        T::computeLift(T::Ufield, T::liftfield, T::Uomfield);
+        //T::computeLift(T::Ufield, T::liftfield, T::Uomfield);
+        computeLift(T::Ufield, T::liftfield, T::Uomfield);
         // Perform POD on the velocity snapshots
         ITHACAPOD::getModes(T::Uomfield, T::Umodes, T::_U().name(),
                             T::podex, 0, 0, T::NUmodesOut);
@@ -276,3 +277,22 @@ void Bifurcation<T>::lift_solve()
         }
     }
 }
+
+template <typename T>
+template <typename G>
+void Bifurcation<T>::computeLift(G& Lfield, G& liftfield, G& omfield)
+ {
+
+     for (label k = 0; k < T::inletIndex.rows(); k++)
+     {
+
+         for (label j = 0; j < Lfield.size(); j++)
+         {
+                 volVectorField C("U", Lfield[j] - liftfield[k]);
+             if (k == 0)
+                 omfield.append(C);
+             else
+                 omfield.set(j, C);
+         }
+     }
+ }
