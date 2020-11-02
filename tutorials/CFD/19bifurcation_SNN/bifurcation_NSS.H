@@ -53,7 +53,6 @@ private:
     scalar x_cord;
     scalar y_cord;
     label component;
-    using T::mu;
     using T::mu_range;
     //Eigen::MatrixXd & mu=T::mu;
     scalar sampling_velocity(label id_cell,label component);
@@ -64,6 +63,7 @@ private:
     word lift_keyword;
 
 public:
+    using T::mu;
     void lift_solve();
     void print_mu() {
         Info<<mu<<endl;
