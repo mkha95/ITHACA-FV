@@ -138,6 +138,8 @@ void Bifurcation<T>::prepare_POD(void)
     ITHACAPOD::getModes(T::supfield, T::supmodes, T::_U().name(),
                         T::podex,
                         T::supex, 1, T::NSUPmodesOut);
+    T::projectSUP("./Matrices", T::NUmodes, T::NPmodes, T::NSUPmodes);
+
 }
 
 
