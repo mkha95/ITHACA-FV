@@ -61,7 +61,7 @@ private:
     void print_section_name(const std::string &) const;
     Eigen::VectorXd sampled_field;
     word lift_keyword;
-
+    template <typename G> void computeLift(G &Lfield,G & 	liftfield,G & 	omfield );
 public:
     using T::mu;
     void lift_solve();
