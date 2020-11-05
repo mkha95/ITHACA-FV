@@ -17,10 +17,13 @@ FoamFile
 
 
 
-N_mu 5;
-mu_inf 1.3;
-mu_sup 0.4;
+N_mu 40;
+mu_inf 2;
+mu_sup 0.5;
 x_cord 20;
 y_cord 1.25;
 field velocity;
 component y;
+
+
+lift snapshot;
