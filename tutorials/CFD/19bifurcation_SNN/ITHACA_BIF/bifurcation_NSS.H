@@ -28,7 +28,6 @@ SourceFiles
 \*---------------------------------------------------------------------------*/
 #ifndef bifurcation_NSS_H
 #define bifurcation_NSS_H
-#include "steadyNS.H"
 #include "ITHACAstream.C"
 #include "ITHACAPOD.H"
 #include "ReducedSteadyNS.H"
@@ -78,6 +77,5 @@ public:
     //void print_bifurcation() const;
 };
 
-#include "bifurcation_NSS_imp.H"
 
 #endif
