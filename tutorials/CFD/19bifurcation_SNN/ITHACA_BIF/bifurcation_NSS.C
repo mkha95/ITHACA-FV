@@ -1,5 +1,10 @@
+#include "bifurcation_NSS.H"
+#include "steadyNS.H"
 #include <algorithm>
 #include <map>
+
+
+
 template<typename T, typename... Args>
 std::unique_ptr<T> make_unique(Args&&... args) {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
@@ -296,3 +301,7 @@ void Bifurcation<T>::computeLift(G& Lfield, G& liftfield, G& omfield)
          }
      }
  }
+
+
+
+template class Bifurcation<steadyNS>;
