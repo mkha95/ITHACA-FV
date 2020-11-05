@@ -11,7 +11,7 @@ then
 else
     if [ "$1" = "refined" ]
     then
-        echo "creating coarse mesh"
+        echo "creating refined mesh"
         cp utilities/meshes/fine_mesh/coanda_mesh_ref.msh .
         gmshToFoam coanda_mesh_ref.msh
         cp utilities/meshes/fine_mesh/boundary constant/polyMesh/
