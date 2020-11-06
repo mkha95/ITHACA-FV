@@ -1,4 +1,37 @@
-#include "bifurcation_NSS.H"
+/*---------------------------------------------------------------------------*\
+     ██╗████████╗██╗  ██╗ █████╗  ██████╗ █████╗       ███████╗██╗   ██╗
+     ██║╚══██╔══╝██║  ██║██╔══██╗██╔════╝██╔══██╗      ██╔════╝██║   ██║
+     ██║   ██║   ███████║███████║██║     ███████║█████╗█████╗  ██║   ██║
+     ██║   ██║   ██╔══██║██╔══██║██║     ██╔══██║╚════╝██╔══╝  ╚██╗ ██╔╝
+     ██║   ██║   ██║  ██║██║  ██║╚██████╗██║  ██║      ██║      ╚████╔╝
+     ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝      ╚═╝       ╚═══╝
+
+ * In real Time Highly Advanced Computational Applications for Finite Volumes
+ * Copyright (C) 2017 by the ITHACA-FV authors
+-------------------------------------------------------------------------------
+
+License
+    This file is part of ITHACA-FV
+
+    ITHACA-FV is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    ITHACA-FV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with ITHACA-FV. If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+
+
+
+#include "bifurcationFOM_NSS.H"
 #include "steadyNS.H"
 #include "SteadyNSSimple.H"
 #include <algorithm>
@@ -37,6 +70,18 @@ Bifurcation<T>::Bifurcation(int argc, char* argv[])
     field  =bif_params->lookupOrDefault<word>("field","velocity");
     word coord  =bif_params->lookupOrDefault<word>("component","x");
     lift_keyword = bif_params->lookupOrDefault<word>("lift","snapshot");
+    T::inletIndex.resize(1,2);
+    T::inletIndex(0,0)=T::_mesh().boundaryMesh().findPatchID("inlet");
+    T::inletIndex(0,1)=0;
+    parabolic_inlet = bif_params->lookupOrDefault<bool>("parabolic_inlet",true);
+    if (parabolic_inlet)
+    {
+        Info<<"motherfucker"<<endl;
+        scalarList coefs(3);
+        parabolic_inlet_coefs = bif_params->lookupOrDefault<scalarList>("par_coefs",coefs);
+        set_parabolic_inlet(parabolic_inlet_coefs);
+    }
+
     id_cell=T::_mesh().findCell(point(x_cord,y_cord,0));
     if(id_cell<0)
     {
@@ -76,9 +121,6 @@ Bifurcation<T>::Bifurcation(int argc, char* argv[])
     std::cout<<"mu_range:"<<std::endl<<mu_range<<std::endl;
     T::genEquiPar();
     sampled_field.resize(N_mu);
-    T::inletIndex.resize(1,2);
-    T::inletIndex(0,0)=T::_mesh().boundaryMesh().findPatchID("inlet");
-    T::inletIndex(0,1)=0;
 };
 
 template <typename T>
@@ -287,21 +329,36 @@ void Bifurcation<T>::lift_solve()
 template <typename T>
 template <typename G>
 void Bifurcation<T>::computeLift(G& Lfield, G& liftfield, G& omfield)
- {
+{
 
-     for (label k = 0; k < T::inletIndex.rows(); k++)
-     {
+    for (label k = 0; k < T::inletIndex.rows(); k++)
+    {
 
-         for (label j = 0; j < Lfield.size(); j++)
-         {
-                 volVectorField C("U", Lfield[j] - liftfield[k]);
-             if (k == 0)
-                 omfield.append(C);
-             else
-                 omfield.set(j, C);
-         }
-     }
- }
+        for (label j = 0; j < Lfield.size(); j++)
+        {
+            volVectorField C("U", Lfield[j] - liftfield[k]);
+            if (k == 0)
+                omfield.append(C);
+            else
+                omfield.set(j, C);
+        }
+    }
+}
+
+template <typename T>
+void Bifurcation<T>::set_parabolic_inlet(const scalarList & coef)
+{
+            label BC_ind = T::inletIndex(0, 0);
+            Info<<"Im in the set parabolic routine"<<endl;
+            Info<<"par_coefs:  "<<coef<<endl;
+            const polyPatch& pp = _mesh().boundaryMesh()[BC_ind];
+            forAll(T::_U().boundaryField()[BC_ind], faceI)
+            {
+               scalar y = pp.faceCentres()[faceI].y();
+               T::_U().boundaryFieldRef()[BC_ind][faceI] = vector(coef[0]*y*y+coef[1]*y+coef[2],0,0);
+            }
+            T::_U().write();
+}
 
 
 
