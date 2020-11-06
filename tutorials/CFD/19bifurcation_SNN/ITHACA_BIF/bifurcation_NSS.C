@@ -1,5 +1,6 @@
 #include "bifurcation_NSS.H"
 #include "steadyNS.H"
+#include "SteadyNSSimple.H"
 #include <algorithm>
 #include <map>
 
@@ -305,3 +306,4 @@ void Bifurcation<T>::computeLift(G& Lfield, G& liftfield, G& omfield)
 
 
 template class Bifurcation<steadyNS>;
+template class Bifurcation<SteadyNSSimple>;
