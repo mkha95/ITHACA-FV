@@ -278,3 +278,8 @@ void SteadyNSSimple::truthSolve2(List<scalar> mu_now, word Folder)
                                    Folder);
     }
 }
+
+void SteadyNSSimple::truthSolve(List<scalar> mu_now)
+{
+    truthSolve2(mu_now);
+}
