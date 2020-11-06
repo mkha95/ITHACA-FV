@@ -55,9 +55,10 @@ BifurcationROM<T>::BifurcationROM(steadyNS& Foamproblem, Eigen::MatrixXd vel): T
 }
 
 template <typename T>
-void BifurcationROM<T>::solveOnline()
+void BifurcationROM<T>::solveOnline(const scalar & nu)
 {
 
+    T::nu=nu;
     Color::Modifier red(Color::FG_RED);
     Color::Modifier green(Color::FG_GREEN);
     Color::Modifier def(Color::FG_DEFAULT);
@@ -85,7 +86,32 @@ void BifurcationROM<T>::solveOnline()
                   hnls.iter << " iterations " << def << std::endl << std::endl;
     }
 
-    T::count_online_solve += 1;
+    Eigen::MatrixXd tmp_sol(T::y.rows() + 1, 1);
+    tmp_sol<< (T::count_online_solve + 1),y;
+    T::online_solution.append(tmp_sol);
+    reconstruct( "./ITHACAoutput/Online/",count_online_solve);
+    count_online_solve += 1;
 }
+
+
+template <typename T>
+void BifurcationROM<T>::reconstruct(fileName folder,const int & counter)
+ {
+     Info<<counter<<endl;
+     if (counter==1)
+     {
+         mkDir(folder);
+         ITHACAutilities::createSymLink(folder);
+     }
+     Eigen::MatrixXd CoeffU= T::online_solution[counter-1].block(1, 0, Nphi_u, 1);
+     Eigen::MatrixXd CoeffP= T::online_solution[counter-1].bottomRows(Nphi_p);
+     volVectorField uRec("uRec", T::Umodes[0]);
+     volScalarField pRec("pRec", T::problem->Pmodes[0]);
+     T::problem->L_U_SUPmodes.reconstruct(uRec, CoeffU, "uRec");
+     T::problem->Pmodes.reconstruct(pRec, CoeffP, "pRec");
+     ITHACAstream::exportSolution(uRec, name(counter), folder);
+     ITHACAstream::exportSolution(pRec, name(counter), folder);
+}
+
 
 template class BifurcationROM<reducedSteadyNS>;

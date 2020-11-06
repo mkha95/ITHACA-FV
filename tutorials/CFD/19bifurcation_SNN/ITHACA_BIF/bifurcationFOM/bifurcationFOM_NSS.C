@@ -76,7 +76,6 @@ Bifurcation<T>::Bifurcation(int argc, char* argv[])
     parabolic_inlet = bif_params->lookupOrDefault<bool>("parabolic_inlet",true);
     if (parabolic_inlet)
     {
-        Info<<"motherfucker"<<endl;
         scalarList coefs(3);
         parabolic_inlet_coefs = bif_params->lookupOrDefault<scalarList>("par_coefs",coefs);
         set_parabolic_inlet(parabolic_inlet_coefs);
@@ -349,8 +348,6 @@ template <typename T>
 void Bifurcation<T>::set_parabolic_inlet(const scalarList & coef)
 {
             label BC_ind = T::inletIndex(0, 0);
-            Info<<"Im in the set parabolic routine"<<endl;
-            Info<<"par_coefs:  "<<coef<<endl;
             const polyPatch& pp = _mesh().boundaryMesh()[BC_ind];
             forAll(T::_U().boundaryField()[BC_ind], faceI)
             {

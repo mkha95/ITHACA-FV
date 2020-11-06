@@ -32,7 +32,7 @@ SourceFiles
 template <typename T>
 class BifurcationROM: public T
 {
-public:
+private:
     using T::y;
     using T::Nphi_u;
     using T::Nphi_p;
@@ -41,8 +41,8 @@ public:
     using T::nu;
     using T::count_online_solve;
     using T::newton_object;
-
+    void reconstruct(fileName folder,const int & counter);
+public:
     BifurcationROM(steadyNS& Foamproblem, Eigen::MatrixXd vel);
-
-    void solveOnline();
+    void solveOnline(const scalar &);
 };
