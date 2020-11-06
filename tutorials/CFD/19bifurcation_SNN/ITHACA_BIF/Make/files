@@ -1,4 +1,5 @@
-bifurcation_NSS.C
+bifurcationFOM/bifurcationFOM_NSS.C
+bifurcationROM/bifurcationROM_NSS.C
 
 
 LIB = $(FOAM_USER_LIBBIN)/libITHACA_BIF
