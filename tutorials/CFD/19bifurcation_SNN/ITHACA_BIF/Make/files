@@ -1,6 +1,6 @@
 bifurcationFOM/bifurcationFOM_NSS.C
-bifurcationROM/bifurcationROM_NSS.C
-
+SteadyNSROM/SteadyNSROM.C
+SimpleSteadyNSROM/SimpleSteadyNSROM.C
 
 LIB = $(FOAM_USER_LIBBIN)/libITHACA_BIF
 

@@ -56,6 +56,11 @@ reducedSimpleSteadyNS::reducedSimpleSteadyNS(SteadyNSSimple& FOMproblem)
     }
 }
 
+
+
+reducedSimpleSteadyNS::reducedSimpleSteadyNS(SteadyNSSimple& FOMproblem, Eigen::MatrixXd vel):
+    problem(&FOMproblem),vel_now(vel){}
+
 // * * * * * * * * * * * * * * * Solve Functions  * * * * * * * * * * * * * //
 
 
@@ -253,6 +258,11 @@ void reducedSimpleSteadyNS::solveOnline_Simple(scalar mu_now,
     ITHACAstream::exportSolution(U, name(counter), Folder);
     ITHACAstream::exportSolution(P, name(counter), Folder);
     runTime.setTime(runTime.startTime(), 0);
+}
+
+void reducedSimpleSteadyNS::solveOnline(const scalar & mu_now)
+{
+       solveOnline_Simple(mu_now,problem->NUmodes, problem->NPmodes);
 }
 
 void reducedSimpleSteadyNS::setOnlineVelocity(Eigen::MatrixXd vel)
