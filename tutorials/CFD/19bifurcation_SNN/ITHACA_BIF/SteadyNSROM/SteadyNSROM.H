@@ -29,20 +29,13 @@ SourceFiles
      bifurcationROM_NSS.C
 \*---------------------------------------------------------------------------*/
 
-template <typename T>
-class BifurcationROM: public T
+#include "ReducedSteadyNS.H"
+
+class SteadyNSROM: reducedSteadyNS
 {
 private:
-    using T::y;
-    using T::Nphi_u;
-    using T::Nphi_p;
-    using T::problem;
-    using T::N_BC;
-    using T::nu;
-    using T::count_online_solve;
-    using T::newton_object;
     void reconstruct(fileName folder,const int & counter);
 public:
-    BifurcationROM(steadyNS& Foamproblem, Eigen::MatrixXd vel);
+    SteadyNSROM(steadyNS& Foamproblem, Eigen::MatrixXd vel);
     void solveOnline(const scalar &);
 };

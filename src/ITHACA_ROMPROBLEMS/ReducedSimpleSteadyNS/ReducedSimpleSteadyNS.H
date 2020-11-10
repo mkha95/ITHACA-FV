@@ -72,6 +72,8 @@ class reducedSimpleSteadyNS: public reducedProblem
         ///
         explicit reducedSimpleSteadyNS(SteadyNSSimple& problem);
 
+        reducedSimpleSteadyNS(SteadyNSSimple& problem, Eigen::MatrixXd vel);
+
         ~reducedSimpleSteadyNS() {};
 
         // Functions
@@ -91,7 +93,7 @@ class reducedSimpleSteadyNS: public reducedProblem
         void solveOnline_Simple(scalar mu_now, int NmodesUproj, int NmodesPproj,
                                 int NmodesNut = 0,
                                 int NmodesSup = 0,
-                                word Folder = "./ITHACAoutput/Reconstruct/");
+                                word Folder = "./ITHACAoutput/Online/");
         ///
         /// @brief      It checks if the number of imposed boundary conditions is correct
         /// and set the inlet velocity equal to the given one.
@@ -119,6 +121,11 @@ class reducedSimpleSteadyNS: public reducedProblem
 
         /// Counter.
         int counter = 0;
+
+
+        void solveOnline(const scalar &);
+
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
