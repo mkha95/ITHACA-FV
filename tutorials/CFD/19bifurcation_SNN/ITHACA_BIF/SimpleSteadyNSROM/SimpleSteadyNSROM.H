@@ -52,5 +52,4 @@ class SimpleSteadyNSROM: public reducedSimpleSteadyNS
     scalar residual_jump;
 public:
     SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixXd vel);
-    void solveOnline(const scalar &);
 };
