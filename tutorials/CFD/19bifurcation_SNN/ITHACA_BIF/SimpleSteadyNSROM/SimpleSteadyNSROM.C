@@ -30,17 +30,17 @@ License
 #include "SimpleSteadyNSROM.H"
 
 SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixXd vel)
-:
-reducedSimpleSteadyNS(Foamproblem, vel),
-P(Foamproblem._p()),
-U(Foamproblem._U()),
-mesh(Foamproblem._mesh()),
-phi(Foamproblem._phi()),
-Folder("./ITHACAoutput/Online"),
-NmodesUproj(Foamproblem.NUmodes),
-NmodesPproj(Foamproblem.NPmodes),
-NmodesSup(Foamproblem.NSUPmodes),
-NmodesNut(Foamproblem.NNutModes)
+    :
+    reducedSimpleSteadyNS(Foamproblem, vel),
+    P(Foamproblem._p()),
+    U(Foamproblem._U()),
+    mesh(Foamproblem._mesh()),
+    phi(Foamproblem._phi()),
+    Folder("./ITHACAoutput/Online"),
+    NmodesUproj(Foamproblem.NUmodes),
+    NmodesPproj(Foamproblem.NPmodes),
+    NmodesSup(Foamproblem.NSUPmodes),
+    NmodesNut(Foamproblem.NNutModes)
 {
 
     ULmodes.resize(0);
@@ -69,12 +69,8 @@ NmodesNut(Foamproblem.NNutModes)
     PprojN = NmodesPproj;
     a=Eigen::VectorXd::Zero(UprojN);
     b=Eigen::VectorXd::Zero(PprojN);
-
     a(0) = vel(0, 0);
-
     Info<<"checkpoinnt3"<<endl;
-
-
     residualJumpLim =
         problem->para->ITHACAdict->lookupOrDefault<float>("residualJumpLim", 1e-5);
     normalizedResidualLim =
@@ -83,9 +79,7 @@ NmodesNut(Foamproblem.NNutModes)
 
     problem->restart();
 
-    scalar residual_jump=1 + residualJumpLim;
-
-
+    residual_jump=1 + residualJumpLim;
 }
 
 
@@ -93,12 +87,12 @@ NmodesNut(Foamproblem.NNutModes)
 void SimpleSteadyNSROM::solveOnline(const scalar & mu_now)
 {
     counter++;
-//    problem->change_viscosity(mu_now);
+    problem->change_viscosity(mu_now);
     if (counter==1)
-     {
-         mkDir(Folder);
-         ITHACAutilities::createSymLink(Folder);
-     }
+    {
+        mkDir(Folder);
+        ITHACAutilities::createSymLink(Folder);
+    }
 
     Eigen::VectorXd uresidualOld = Eigen::VectorXd::Zero(UprojN);
     Eigen::VectorXd presidualOld = Eigen::VectorXd::Zero(PprojN);
