@@ -17,7 +17,7 @@ FoamFile
 
 
 
-N_mu 40;
+N_mu 10;
 mu_inf 2;
 mu_sup 0.5;
 x_cord 20;
@@ -27,3 +27,4 @@ component y;
 
 
 lift snapshot;
+par_coefs (-20 50 0);

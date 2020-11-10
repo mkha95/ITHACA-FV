@@ -1,5 +1,7 @@
 #!/bin/bash
 
+
+cp utilities/U 0/U
 if [ "$1" = "coarse" ]
 then
     echo "creating coarse mesh"

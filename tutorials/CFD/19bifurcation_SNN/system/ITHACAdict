@@ -20,10 +20,10 @@ EigenSolver eigen;
 // Number of modes to output and to use for projection
 NmodesUout 5;
 NmodesUproj 5;
-NmodesPout 6;
-NmodesPproj 6;
-NmodesSUPout 6;
-NmodesSUPproj 6;
+NmodesPout 5;
+NmodesPproj 5;
+NmodesSUPout 5;
+NmodesSUPproj 5;
 
 // Output format to save market vectors.
 OutPrecision 20;
@@ -47,3 +47,5 @@ normalizationNorm L2;
 
 
 maxIter 200000;
+
+middleExport false;

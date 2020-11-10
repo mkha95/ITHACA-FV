@@ -42,15 +42,10 @@ int main(int argc,char * argv[])
 
     Eigen::MatrixXd vel_now(1, 1);
     vel_now(0, 0) = 1;
-    Info << bif.mu<<endl;
 
     SimpleSteadyNSROM reduced(bif,vel_now);
-     // Perform an online solve for the new values of inlet velocities
      for (label k = 0; k < bif.mu.size(); k++)
      {
-         Info<<"k= "<<k<<endl;
-         Info<<"k= "<<bif.mu(0,k)<<endl;
-         // Set the reduced viscosity
          reduced.solveOnline(bif.mu(0,k));
      }
      Info <<"end of main"<<endl;
