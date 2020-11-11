@@ -108,5 +108,3 @@ void SteadyNSROM::reconstruct(fileName folder,const int & counter)
      ITHACAstream::exportSolution(uRec, name(counter), folder);
      ITHACAstream::exportSolution(pRec, name(counter), folder);
 }
-
-

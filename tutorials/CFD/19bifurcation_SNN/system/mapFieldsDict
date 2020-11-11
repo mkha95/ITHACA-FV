@@ -1,8 +1,7 @@
-
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  2.2.2                                 |
+|  \\    /   O peration     | Version:  2.4.0                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -12,19 +11,13 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      BIFURCATIONdict;
+    object      mapFieldsDict;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+patchMap        ( );
+
+cuttingPatches  ( );
 
 
-
-N_mu 7;
-mu_inf 2;
-mu_sup 0.5;
-x_cord 20;
-y_cord 1.25;
-field velocity;
-component y;
-
-
-lift snapshot;
-par_coefs (-20 50 0);
+// ************************************************************************* //

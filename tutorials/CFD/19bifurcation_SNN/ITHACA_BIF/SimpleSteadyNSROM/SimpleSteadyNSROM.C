@@ -45,6 +45,8 @@ SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixX
 
     ULmodes.resize(0);
     Info<<"checkpoinnt1"<<endl;
+    setOnlineVelocity(vel);
+    maxIterOn=100;
 
     for (int i = 0; i < problem->inletIndex.rows(); i++)
     {
@@ -67,9 +69,6 @@ SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixX
 
     UprojN = NmodesUproj + NmodesSup;
     PprojN = NmodesPproj;
-    a=Eigen::VectorXd::Zero(UprojN);
-    b=Eigen::VectorXd::Zero(PprojN);
-    a(0) = vel(0, 0);
     Info<<"checkpoinnt3"<<endl;
     residualJumpLim =
         problem->para->ITHACAdict->lookupOrDefault<float>("residualJumpLim", 1e-5);
@@ -77,14 +76,14 @@ SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixX
         problem->para->ITHACAdict->lookupOrDefault<float>("normalizedResidualLim",
                 1e-5);
 
-    problem->restart();
+    //problem->restart();
 
     residual_jump=1 + residualJumpLim;
 }
 
 
 
-void SimpleSteadyNSROM::solveOnline(const scalar & mu_now)
+void SimpleSteadyNSROM::solveOnline(scalar mu_now)
 {
     counter++;
     problem->change_viscosity(mu_now);
@@ -101,17 +100,23 @@ void SimpleSteadyNSROM::solveOnline(const scalar & mu_now)
     scalar U_norm_res(1);
     scalar P_norm_res(1);
     Time& runTime = problem->_runTime();
+    Eigen::MatrixXd a = Eigen::VectorXd::Zero(UprojN);
+    Eigen::MatrixXd b = Eigen::VectorXd::Zero(PprojN);
+    a(0) = vel_now(0, 0);
     P.rename("p");
-    ULmodes.reconstruct(U, a, "U");
+    //ULmodes.reconstruct(U, a, "U");
     Info<<"checkpoinnt4"<<endl;
-    problem->Pmodes.reconstruct(P, b, "p");
+    //problem->Pmodes.reconstruct(P, b, "p");
     Info<<"checkpoinnt5"<<endl;
     phi = fvc::interpolate(U) & U.mesh().Sf();
     int iter = 0;
     simpleControl& simple = problem->_simple();
+    Info<<"checkpoinnt6"<<endl;
 
     if (ITHACAutilities::isTurbulent())
     {
+
+        Info<<"checkpoinnt7"<<endl;
         Eigen::MatrixXd nutCoeff;
         nutCoeff.resize(NmodesNut, 1);
 
@@ -130,6 +135,7 @@ void SimpleSteadyNSROM::solveOnline(const scalar & mu_now)
     }
 
     PtrList<volVectorField> gradModP;
+    Info<<"checkpoinnt8"<<endl;
 
     for (int i = 0; i < NmodesPproj; i++)
     {
@@ -138,6 +144,7 @@ void SimpleSteadyNSROM::solveOnline(const scalar & mu_now)
 
     projGradModP = ULmodes.project(gradModP, NmodesUproj);
 
+    Info<<"checkpoinnt9"<<endl;
     while ((residual_jump > residualJumpLim
             || std::max(U_norm_res, P_norm_res) > normalizedResidualLim)
             && iter < maxIterOn)

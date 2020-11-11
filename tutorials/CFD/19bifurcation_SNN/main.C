@@ -46,7 +46,8 @@ int main(int argc,char * argv[])
     SimpleSteadyNSROM reduced(bif,vel_now);
      for (label k = 0; k < bif.mu.size(); k++)
      {
-         reduced.solveOnline(bif.mu(0,k));
+         scalar mu_now=bif.mu(0,k);
+         reduced.solveOnline(mu_now);
      }
      Info <<"end of main"<<endl;
 

@@ -38,8 +38,8 @@ class SimpleSteadyNSROM: public reducedSimpleSteadyNS
     volScalarField& P;
     volVectorField& U;
     fvMesh& mesh;
-    Eigen::MatrixXd a;
-    Eigen::MatrixXd b;
+//    Eigen::MatrixXd a;
+//    Eigen::MatrixXd b;
     surfaceScalarField& phi;
     word Folder;
     label NmodesUproj;
@@ -52,5 +52,5 @@ class SimpleSteadyNSROM: public reducedSimpleSteadyNS
     scalar residual_jump;
     public:
     SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixXd vel);
-    void solveOnline(const scalar &);
+    void solveOnline(scalar );
 };

@@ -151,7 +151,6 @@ void Bifurcation<T>::offlineSolve()
 template <typename T>
 void Bifurcation<T>::prepare_POD(void)
 {
-    T::restart();
     T::solvesupremizer();
     ITHACAparameters* para = ITHACAparameters::getInstance(this->_mesh(),
                              this->_runTime());
@@ -179,7 +178,7 @@ void Bifurcation<T>::prepare_POD(void)
                             T::podex, 0, 0, T::NUmodesOut);
     }
 
-    // Perform POD on velocity pressure and supremizers and store the first 10 modes
+    // Perform POD on velocity pressure and supremizers and store the first modes
     ITHACAPOD::getModes(T::Pfield, T::Pmodes, T::_p().name(),
                         T::podex, 0, 0,
                         T::NPmodesOut);
