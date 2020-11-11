@@ -42,7 +42,7 @@ class Bifurcation:public T
 private:
     using T::inletIndex;
     using T::_mesh;
-    IOdictionary* bif_params;
+    std::unique_ptr<IOdictionary> bif_params;
     //mu range for the bifurcation diagram
     scalar mu_inf;
     scalar mu_sup;

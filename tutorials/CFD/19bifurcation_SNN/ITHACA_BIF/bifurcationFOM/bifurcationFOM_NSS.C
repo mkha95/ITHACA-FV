@@ -49,7 +49,7 @@ Bifurcation<T>::Bifurcation(int argc, char* argv[])
     :T( argc, argv)
 {
     print_section_name("READING BIFURCATION PARAMETERS");
-    bif_params = new IOdictionary
+    bif_params = make_unique<IOdictionary>
     (IOobject
      (
          "BIFURCATIONdict",
