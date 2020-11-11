@@ -45,7 +45,7 @@ SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixX
 
     ULmodes.resize(0);
     Info<<"checkpoinnt1"<<endl;
-    setOnlineVelocity(vel);
+//    setOnlineVelocity(vel);
     maxIterOn=100;
 
     for (int i = 0; i < problem->inletIndex.rows(); i++)
@@ -67,7 +67,7 @@ SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixX
     Info<<"checkpoinnt2"<<endl;
 
 
-    UprojN = NmodesUproj + NmodesSup;
+    UprojN = NmodesUproj+NmodesSup;
     PprojN = NmodesPproj;
     Info<<"checkpoinnt3"<<endl;
     residualJumpLim =
@@ -76,9 +76,11 @@ SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixX
         problem->para->ITHACAdict->lookupOrDefault<float>("normalizedResidualLim",
                 1e-5);
 
-    //problem->restart();
 
     residual_jump=1 + residualJumpLim;
+    a = Eigen::VectorXd::Zero(UprojN);
+    b = Eigen::VectorXd::Zero(PprojN);
+    a(0) = vel_now(0, 0);
 }
 
 
@@ -100,13 +102,10 @@ void SimpleSteadyNSROM::solveOnline(scalar mu_now)
     scalar U_norm_res(1);
     scalar P_norm_res(1);
     Time& runTime = problem->_runTime();
-    Eigen::MatrixXd a = Eigen::VectorXd::Zero(UprojN);
-    Eigen::MatrixXd b = Eigen::VectorXd::Zero(PprojN);
-    a(0) = vel_now(0, 0);
     P.rename("p");
-    //ULmodes.reconstruct(U, a, "U");
+    ULmodes.reconstruct(U, a, "U");
     Info<<"checkpoinnt4"<<endl;
-    //problem->Pmodes.reconstruct(P, b, "p");
+    problem->Pmodes.reconstruct(P, b, "p");
     Info<<"checkpoinnt5"<<endl;
     phi = fvc::interpolate(U) & U.mesh().Sf();
     int iter = 0;

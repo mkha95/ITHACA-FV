@@ -151,6 +151,7 @@ void Bifurcation<T>::offlineSolve()
 template <typename T>
 void Bifurcation<T>::prepare_POD(void)
 {
+    T::restart();
     T::solvesupremizer();
     ITHACAparameters* para = ITHACAparameters::getInstance(this->_mesh(),
                              this->_runTime());
