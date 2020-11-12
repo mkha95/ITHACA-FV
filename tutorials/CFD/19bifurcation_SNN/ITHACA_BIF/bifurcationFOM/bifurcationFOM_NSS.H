@@ -65,7 +65,12 @@ private:
     word lift_keyword;
     template <typename G> void computeLift(G &Lfield,G & 	liftfield,G & 	omfield );
     void set_parabolic_inlet(const scalarList &);
+    Eigen::MatrixXd cumUeig, cumPeig, cumSupeig;
+    scalar cum_eig_tol=0.99999;
+
+    void read_matrix(Eigen::MatrixXd & mat,std::string folder);
 public:
+    int sugUmodes,sugPmodes, sugSupmodes;
     using T::mu;
     void lift_solve();
     void print_mu() {
@@ -78,7 +83,6 @@ public:
     ~Bifurcation()=default;
     void offlineSolve();
     void prepare_POD();
-    //void print_bifurcation() const;
 };
 
 

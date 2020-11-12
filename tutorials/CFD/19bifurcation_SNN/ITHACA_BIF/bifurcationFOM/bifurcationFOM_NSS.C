@@ -164,9 +164,6 @@ void Bifurcation<T>::prepare_POD(void)
     if (T::bcMethod == "lift")
     {
         lift_solve();
-        //ITHACAutilities::normalizeFields(T::liftfield);
-        // Homogenize the snapshots
-        //T::computeLift(T::Ufield, T::liftfield, T::Uomfield);
         computeLift(T::Ufield, T::liftfield, T::Uomfield);
         // Perform POD on the velocity snapshots
         ITHACAPOD::getModes(T::Uomfield, T::Umodes, T::_U().name(),
@@ -188,6 +185,21 @@ void Bifurcation<T>::prepare_POD(void)
                         T::supex, 1, T::NSUPmodesOut);
     T::projectSUP("./Matrices", T::NUmodes, T::NPmodes, T::NSUPmodes);
 
+    read_matrix(cumUeig,"./ITHACAoutput/POD/CumEigenvalues_U");
+    read_matrix(cumPeig,"./ITHACAoutput/POD/CumEigenvalues_p");
+    read_matrix(cumSupeig,"./ITHACAoutput/POD/CumEigenvalues_Usup");
+    double cum_eig_tol=0.9999;
+    bool check=true;
+    for(sugUmodes=0;sugUmodes<cumUeig.rows() && check;sugUmodes++)
+        check=(cumUeig(sugUmodes,0)<cum_eig_tol);
+
+    check=true;
+    for(sugPmodes=0;sugPmodes<cumPeig.rows() && check;sugPmodes++)
+        check=(cumPeig(sugPmodes,0)<cum_eig_tol);
+
+    check=true;
+    for(sugSupmodes=0;sugSupmodes<cumSupeig.rows() && check;sugSupmodes++)
+        check=(cumSupeig(sugSupmodes,0)<cum_eig_tol);
 }
 
 
@@ -357,6 +369,24 @@ void Bifurcation<T>::set_parabolic_inlet(const scalarList & coef)
             T::_U().write();
 }
 
+
+
+template <typename T>
+void Bifurcation<T>::read_matrix(Eigen::MatrixXd & mat,std::string folder)
+{
+  int n, m;
+  std::fstream myfile;
+  myfile.open (folder);
+  myfile.ignore(1000,'\n');
+  myfile >> n >> m;
+  mat.resize(n,m);
+
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      myfile >> mat(i,j);
+    }
+  }
+}
 
 
 template class Bifurcation<steadyNS>;

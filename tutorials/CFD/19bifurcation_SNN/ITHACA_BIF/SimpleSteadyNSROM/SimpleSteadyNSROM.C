@@ -45,7 +45,6 @@ SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixX
 
     ULmodes.resize(0);
     Info<<"checkpoinnt1"<<endl;
-//    setOnlineVelocity(vel);
     maxIterOn=100;
 
     for (int i = 0; i < problem->inletIndex.rows(); i++)
@@ -67,7 +66,7 @@ SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixX
     Info<<"checkpoinnt2"<<endl;
 
 
-    UprojN = NmodesUproj+NmodesSup;
+    UprojN = NmodesUproj;
     PprojN = NmodesPproj;
     Info<<"checkpoinnt3"<<endl;
     residualJumpLim =
