@@ -70,6 +70,7 @@ private:
 
     void read_matrix(Eigen::MatrixXd & mat,std::string folder);
 public:
+    Eigen::VectorXd computation_times;
     int sugUmodes,sugPmodes, sugSupmodes;
     using T::mu;
     void lift_solve();
@@ -83,7 +84,9 @@ public:
     ~Bifurcation()=default;
     void offlineSolve();
     void prepare_POD();
+    word online;
 };
+
 
 
 #endif

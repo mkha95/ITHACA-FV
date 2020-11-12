@@ -230,6 +230,8 @@ void SimpleSteadyNSROM::solveOnline(scalar mu_now)
     ULmodes.reconstruct(U, a, "Uaux");
     P.rename("Paux");
     problem->Pmodes.reconstruct(P, b, "Paux");
+    uRecFields.append(U);
+    pRecFields.append(P);
     ITHACAstream::exportSolution(U, name(counter), Folder);
     ITHACAstream::exportSolution(P, name(counter), Folder);
     runTime.setTime(runTime.startTime(), 0);

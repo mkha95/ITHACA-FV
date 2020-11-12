@@ -1,32 +1,32 @@
- /*---------------------------------------------------------------------------*\
-      ██╗████████╗██╗  ██╗ █████╗  ██████╗ █████╗       ███████╗██╗   ██╗
-      ██║╚══██╔══╝██║  ██║██╔══██╗██╔════╝██╔══██╗      ██╔════╝██║   ██║
-      ██║   ██║   ███████║███████║██║     ███████║█████╗█████╗  ██║   ██║
-      ██║   ██║   ██╔══██║██╔══██║██║     ██╔══██║╚════╝██╔══╝  ╚██╗ ██╔╝
-      ██║   ██║   ██║  ██║██║  ██║╚██████╗██║  ██║      ██║      ╚████╔╝
-      ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝      ╚═╝       ╚═══╝
+/*---------------------------------------------------------------------------*\
+     ██╗████████╗██╗  ██╗ █████╗  ██████╗ █████╗       ███████╗██╗   ██╗
+     ██║╚══██╔══╝██║  ██║██╔══██╗██╔════╝██╔══██╗      ██╔════╝██║   ██║
+     ██║   ██║   ███████║███████║██║     ███████║█████╗█████╗  ██║   ██║
+     ██║   ██║   ██╔══██║██╔══██║██║     ██╔══██║╚════╝██╔══╝  ╚██╗ ██╔╝
+     ██║   ██║   ██║  ██║██║  ██║╚██████╗██║  ██║      ██║      ╚████╔╝
+     ╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝      ╚═╝       ╚═══╝
 
-  * In real Time Highly Advanced Computational Applications for Finite Volumes
-  * Copyright (C) 2017 by the ITHACA-FV authors
- -------------------------------------------------------------------------------
+ * In real Time Highly Advanced Computational Applications for Finite Volumes
+ * Copyright (C) 2017 by the ITHACA-FV authors
+-------------------------------------------------------------------------------
 
- License
-     This file is part of ITHACA-FV
+License
+    This file is part of ITHACA-FV
 
-     ITHACA-FV is free software: you can redistribute it and/or modify
-     it under the terms of the GNU Lesser General Public License as published by
-     the Free Software Foundation, either version 3 of the License, or
-     (at your option) any later version.
+    ITHACA-FV is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-     ITHACA-FV is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-     GNU Lesser General Public License for more details.
+    ITHACA-FV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Lesser General Public License for more details.
 
-     You should have received a copy of the GNU Lesser General Public License
-     along with ITHACA-FV. If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Lesser General Public License
+    along with ITHACA-FV. If not, see <http://www.gnu.org/licenses/>.
 
- \*---------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "bifurcationFOM_NSS.H"
 #include "SteadyNSSimple.H"
@@ -34,33 +34,43 @@
 #include "SteadyNSROM.H"
 
 
+
 int main(int argc,char * argv[])
 {
     Bifurcation<SteadyNSSimple> bif(argc,argv);
     bif.offlineSolve();
     bif.prepare_POD();
+    std::cout<<"suggested value for modesU:   "<<bif.sugUmodes<<std::endl;
+    std::cout<<"suggested value for modesp:   "<<bif.sugPmodes<<std::endl;
+    std::cout<<"suggested value for modesSup: "<<bif.sugSupmodes<<std::endl;
+    if (bif.online=="yes")
+    {
+        Eigen::MatrixXd vel_now(1, 1);
+        vel_now(0, 0) = 1;
+        SimpleSteadyNSROM reduced(bif,vel_now);
+        for (label k = 0; k < bif.mu.size(); k++)
+        {
+            scalar mu_now=bif.mu(0,k);
+            reduced.solveOnline(mu_now);
+        }
 
-    Eigen::MatrixXd vel_now(1, 1);
-    vel_now(0, 0) = 1;
+    Eigen::MatrixXd errFrobU = ITHACAutilities::errorFrobRel(bif.Ufield,
+                               reduced.uRecFields);
+    Eigen::MatrixXd errFrobP =  ITHACAutilities::errorFrobRel(bif.Pfield,
+                                reduced.pRecFields);
+    Eigen::MatrixXd errL2U = ITHACAutilities::errorL2Rel(bif.Ufield,
+                             reduced.uRecFields);
+    Eigen::MatrixXd errL2P =  ITHACAutilities::errorL2Rel(bif.Pfield,
+                              reduced.pRecFields);
+    ITHACAstream::exportMatrix(errFrobU, "errFrobU", "matlab",
+                               "./ITHACAoutput/ErrorsFrob/");
+    ITHACAstream::exportMatrix(errFrobP, "errFrobP", "matlab",
+                               "./ITHACAoutput/ErrorsFrob/");
+    ITHACAstream::exportMatrix(errL2U, "errL2U", "matlab",
+                               "./ITHACAoutput/ErrorsL2/");
+    ITHACAstream::exportMatrix(errL2P, "errL2P", "matlab",
+                               "./ITHACAoutput/ErrorsL2/");
+    }
 
-    SimpleSteadyNSROM reduced(bif,vel_now);
-     for (label k = 0; k < bif.mu.size(); k++)
-     {
-         scalar mu_now=bif.mu(0,k);
-         reduced.solveOnline(mu_now);
-     }
-     Info <<"end of main"<<endl;
-
-//      reducedSimpleSteadyNS reduced(bif);
-//      scalar NmodesUproj=bif.NUmodes;
-//      scalar NmodesPproj=bif.NPmodes;
-// //     reduced.setOnlineVelocity(vel_now);
-//
-//     for (label k = 0; k < (bif.mu).size(); k++)
-//     {
-//         scalar mu_now = bif.mu(0, k);
-//         reduced.solveOnline_Simple(mu_now, NmodesUproj, NmodesPproj);
-//     }
-
-     return 0;
- }
+    return 0;
+}

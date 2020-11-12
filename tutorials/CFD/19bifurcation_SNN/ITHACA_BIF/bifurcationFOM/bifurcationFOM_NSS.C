@@ -140,10 +140,16 @@ void Bifurcation<T>::offlineSolve()
         {
             mu_now[0] = mu(0, i);
             T::change_viscosity(mu(0, i));
+            auto start_ROM_REC = std::chrono::high_resolution_clock::now();
             T::truthSolve(mu_now);
+            auto finish_ROM_REC = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed_ROM_REC = finish_ROM_REC - start_ROM_REC;
+            computation_times(i)=elapsed.count();
             sampled_field(i)=sampling();
         }
+        total_computation_time=computation_times.sum();
         ITHACAstream::exportVector(sampled_field,"sampled_field","eigen","./ITHACAoutput/Offline");
+        ITHACAstream::exportVector(computation_times,"computation_times_FOM","eigen","./ITHACAoutput/Offline");
     }
 
 };
@@ -161,6 +167,7 @@ void Bifurcation<T>::prepare_POD(void)
     T::NUmodes = para->ITHACAdict->lookupOrDefault<scalar>("NmodesUproj", 10);
     T::NPmodes = para->ITHACAdict->lookupOrDefault<scalar>("NmodesPproj", 10);
     T::NSUPmodes = para->ITHACAdict->lookupOrDefault<scalar>("NmodesSUPproj", 10);
+    online= para->ITHACAdict->lookupOrDefault<word>("online","no");
     if (T::bcMethod == "lift")
     {
         lift_solve();

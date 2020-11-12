@@ -51,6 +51,9 @@ class SimpleSteadyNSROM: public reducedSimpleSteadyNS
     float normalizedResidualLim;
     scalar residual_jump;
     public:
+         PtrList<volScalarField> pRecFields;
+
+         PtrList<volVectorField> uRecFields;
     SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixXd vel);
     void solveOnline(scalar );
     ~SimpleSteadyNSROM() {};
