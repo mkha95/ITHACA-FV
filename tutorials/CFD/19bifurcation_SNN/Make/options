@@ -37,7 +37,7 @@ EXE_INC = \
     -I$(LIB_ITHACA_SRC)/thirdparty/Eigen \
     -I$(LIB_ITHACA_SRC)/thirdparty/spectra/include \
     -I$(LIB_ITHACA_SRC)/ITHACA_THIRD_PARTY/splinter/include \
-    -IITHACA_BIF/lnInclude \
+    -I$(LIB_ITHACA_SRC)/ITHACA_BIF/lnInclude \
     -DOFVER=$${WM_PROJECT_VERSION%.*} \
     -Wno-comment \
     -w \
