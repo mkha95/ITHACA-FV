@@ -19,16 +19,10 @@ source etc/bashrc
 
 
 ### 2. Running the test case
-This tutorial uses a shared library which is not compiled during the
-installation of ITHACA-FV. In order to compile it move to the ITHACA_BIF folder
-and run:
-```
-wmake
-```
-This will create a shared libray object which will be stored in $(FOAM_USER_LIBBIN)
+This tutorial uses the shared libray object ITHACA_BIF which will is stored in $(FOAM_USER_LIBBIN) and whose implementation can be found in ITHACA-FV/src/ITHACA_BIF
 
 After having compiled the library, one needs to compile the executable for the
-test case, this can be done again with:
+test case, this can be done  with:
 
 ```
 wmake
@@ -67,8 +61,6 @@ particular one can find the following subdirectoris:
 * [**Offline**] which will contain the fields computed for the ROM problem during the online phase
 * [**Online**] which will contain the fields computed for the ROM problem during the online phase
 * [**POD**] containing information about the POD phase
-ITHACA_BIF: folder containing the files needed to compile the ITHACA_BIF
-shared library which will be stored in $(FOAM_USER_LIBBIN)
 
 
 
