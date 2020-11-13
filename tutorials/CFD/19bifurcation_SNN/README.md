@@ -1,16 +1,13 @@
-# TUTORIAL 19: BIFURCATION ANALYSIS FOR STEADY NS
-
+# TUTORIAL 19: BIFURCATION ANALYSIS FOR STEADY NS: case study on COANDA EFFECT
 This is the case folder for a bifurcation analysis on the coanda effect.
-In order to effectively run the tutorial, after having compiled the ITHACA-FV
-library with the instruction provided in https://github.com/mathLab/ITHACA-FV.
-Make sure to source the file ITHACA-FV/etc/bash.
-Go to the ITHACA_BIF folder and run wmake in order to compile the shared
-library linked to the case test.
-Then from the folder 19bifurcation_SNN run again wmake to compile the
-bifurcationNSS.exe executable;
 
-In order to run the executable after the compilation it is sufficient to
-execute the command:
+
+<p align="center">
+  <a href="https://en.wikipedia.org/wiki/Coand%C4%83_effect" target="_blank" >
+    <img alt="COANDA-EFFECT" src="./img/bif.png" width="1000" />
+  </a>
+</p>
+
 
 
 ### 1. Prerequisites
@@ -52,7 +49,7 @@ In order to clean up the directory and removing the output data you can run:
 
 ### 2.  Important files and folders:
 
-- mesh.sh: this is a basic bash script that allows changing the current mesh,
+ mesh.sh: this is a basic bash script that allows changing the current mesh,
 it must be run with one of the available option: refined, coarse, structured.
 The relevant information are extracted from the utilities folder.
 Example of usage
@@ -61,7 +58,7 @@ Example of usage
 ./mesh.sh coarse
 ```
 
-- system folder: contains all the dictionary necessary to run the case, in
+ system folder: contains all the dictionary necessary to run the case, in
 particular:
 * [**BIFURCATION**]needed to set all the user defined bifurcation parameters
 * [**ITHACAdict**] containing information about the POD phase
@@ -70,7 +67,7 @@ particular one can find the following subdirectoris:
 * [**Offline**] which will contain the fields computed for the ROM problem during the online phase
 * [**Online**] which will contain the fields computed for the ROM problem during the online phase
 * [**POD**] containing information about the POD phase
--ITHACA_BIF: folder containing the files needed to compile the ITHACA_BIF
+ITHACA_BIF: folder containing the files needed to compile the ITHACA_BIF
 shared library which will be stored in $(FOAM_USER_LIBBIN)
 
 
