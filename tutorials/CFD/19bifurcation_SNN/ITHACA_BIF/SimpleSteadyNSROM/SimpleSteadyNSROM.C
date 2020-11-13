@@ -27,11 +27,20 @@ License
     along with ITHACA-FV. If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
+/// \file
+/// Source file of the SimpleSteadyNSROM class.
+
+
 #include "SimpleSteadyNSROM.H"
 
+// * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * * //
 SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixXd vel)
     :
+    //calling the constructor of the base class
     reducedSimpleSteadyNS(Foamproblem, vel),
+
+    // inizializer list using relevant data from the FOM problem
     P(Foamproblem._p()),
     U(Foamproblem._U()),
     mesh(Foamproblem._mesh()),
@@ -43,9 +52,10 @@ SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixX
     NmodesNut(Foamproblem.NNutModes)
 {
 
+    maxIterOn=2000;
+
+    //appending the modes from the FOM problem
     ULmodes.resize(0);
-    Info<<"checkpoinnt1"<<endl;
-    maxIterOn=100;
 
     for (int i = 0; i < problem->inletIndex.rows(); i++)
     {
@@ -62,31 +72,31 @@ SimpleSteadyNSROM::SimpleSteadyNSROM(SteadyNSSimple& Foamproblem, Eigen::MatrixX
         ULmodes.append(problem->supmodes.toPtrList()[i]);
     }
 
-
-    Info<<"checkpoinnt2"<<endl;
-
-
+    // assigning the number of modes to be extracted
     UprojN = NmodesUproj;
     PprojN = NmodesPproj;
-    Info<<"checkpoinnt3"<<endl;
+
+    // reading values for the residual jump from the ITHACAdict
     residualJumpLim =
         problem->para->ITHACAdict->lookupOrDefault<float>("residualJumpLim", 1e-5);
     normalizedResidualLim =
         problem->para->ITHACAdict->lookupOrDefault<float>("normalizedResidualLim",
                 1e-5);
-
-
     residual_jump=1 + residualJumpLim;
+
+    // inizialization of expansion coefficients and setting up boundary conditions
     a = Eigen::VectorXd::Zero(UprojN);
     b = Eigen::VectorXd::Zero(PprojN);
     a(0) = vel_now(0, 0);
 }
 
 
-
+// REDUCED SIMPLE ALGORITHM solve for current value of the viscosity
 void SimpleSteadyNSROM::solveOnline(scalar mu_now)
 {
     counter++;
+
+    //changing value of the FOM problem, need to be done because the equation are then projected into the reduced space
     problem->change_viscosity(mu_now);
     if (counter==1)
     {
@@ -100,21 +110,21 @@ void SimpleSteadyNSROM::solveOnline(scalar mu_now)
     Eigen::VectorXd presidual = Eigen::VectorXd::Zero(PprojN);
     scalar U_norm_res(1);
     scalar P_norm_res(1);
+
     Time& runTime = problem->_runTime();
     P.rename("p");
     ULmodes.reconstruct(U, a, "U");
-    Info<<"checkpoinnt4"<<endl;
     problem->Pmodes.reconstruct(P, b, "p");
-    Info<<"checkpoinnt5"<<endl;
     phi = fvc::interpolate(U) & U.mesh().Sf();
     int iter = 0;
     simpleControl& simple = problem->_simple();
-    Info<<"checkpoinnt6"<<endl;
 
+
+
+    // eddy modes handling for future expansion with turbulence flow problems
     if (ITHACAutilities::isTurbulent())
     {
 
-        Info<<"checkpoinnt7"<<endl;
         Eigen::MatrixXd nutCoeff;
         nutCoeff.resize(NmodesNut, 1);
 
@@ -133,7 +143,6 @@ void SimpleSteadyNSROM::solveOnline(scalar mu_now)
     }
 
     PtrList<volVectorField> gradModP;
-    Info<<"checkpoinnt8"<<endl;
 
     for (int i = 0; i < NmodesPproj; i++)
     {
@@ -142,7 +151,7 @@ void SimpleSteadyNSROM::solveOnline(scalar mu_now)
 
     projGradModP = ULmodes.project(gradModP, NmodesUproj);
 
-    Info<<"checkpoinnt9"<<endl;
+    //Simple loop
     while ((residual_jump > residualJumpLim
             || std::max(U_norm_res, P_norm_res) > normalizedResidualLim)
             && iter < maxIterOn)
@@ -227,11 +236,15 @@ void SimpleSteadyNSROM::solveOnline(scalar mu_now)
               std::endl;
     std::cout << "Final normalized residual for pressure: " << P_norm_res <<
               std::endl;
+
+    // reconstruction of the full order solution
     ULmodes.reconstruct(U, a, "Uaux");
     P.rename("Paux");
     problem->Pmodes.reconstruct(P, b, "Paux");
     uRecFields.append(U);
     pRecFields.append(P);
+
+    // exporting the solution into the Online folder
     ITHACAstream::exportSolution(U, name(counter), Folder);
     ITHACAstream::exportSolution(P, name(counter), Folder);
     runTime.setTime(runTime.startTime(), 0);

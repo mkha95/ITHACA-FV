@@ -37,23 +37,33 @@ License
 
 int main(int argc,char * argv[])
 {
-    Bifurcation<SteadyNSSimple> bif(argc,argv);
+    //creating a bifurcation object for the steadyNS class
+    Bifurcation<steadyNS> bif(argc,argv);
+    // perform offline solve
     bif.offlineSolve();
+    //prepare POD
     bif.prepare_POD();
+
+    //displaying suggested values for modes number
     std::cout<<"suggested value for modesU:   "<<bif.sugUmodes<<std::endl;
     std::cout<<"suggested value for modesp:   "<<bif.sugPmodes<<std::endl;
     std::cout<<"suggested value for modesSup: "<<bif.sugSupmodes<<std::endl;
     if (bif.online=="yes")
     {
+        // using the same boundary condition as for the FOM problem
         Eigen::MatrixXd vel_now(1, 1);
         vel_now(0, 0) = 1;
-        SimpleSteadyNSROM reduced(bif,vel_now);
+        SteadyNSROM reduced(bif,vel_now);
+
+        // continuation method for the reduced problem
         for (label k = 0; k < bif.mu.size(); k++)
         {
             scalar mu_now=bif.mu(0,k);
             reduced.solveOnline(mu_now);
         }
+    Info<<"Total FOM computation time: "<<bif.total_computation_time<<endl;
 
+    // evaluating reconstruction error
     Eigen::MatrixXd errFrobU = ITHACAutilities::errorFrobRel(bif.Ufield,
                                reduced.uRecFields);
     Eigen::MatrixXd errFrobP =  ITHACAutilities::errorFrobRel(bif.Pfield,
@@ -62,6 +72,8 @@ int main(int argc,char * argv[])
                              reduced.uRecFields);
     Eigen::MatrixXd errL2P =  ITHACAutilities::errorL2Rel(bif.Pfield,
                               reduced.pRecFields);
+
+    //exporting the errors
     ITHACAstream::exportMatrix(errFrobU, "errFrobU", "matlab",
                                "./ITHACAoutput/ErrorsFrob/");
     ITHACAstream::exportMatrix(errFrobP, "errFrobP", "matlab",
