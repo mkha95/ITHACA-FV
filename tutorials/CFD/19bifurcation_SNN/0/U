@@ -23,11 +23,8 @@ boundaryField
 {
     inlet
     {
-        type            parabolicVelocity;
-        n               (1 0 0);
-        y               (0 1 0);
-        maxValue        31.25;
-        value           (0 0 0); // Dummy for paraFoam, which will NOT show a correct profile at time 0.
+        type            fixedValue;
+        value           uniform (0 0 0);
     }
 
     outlet

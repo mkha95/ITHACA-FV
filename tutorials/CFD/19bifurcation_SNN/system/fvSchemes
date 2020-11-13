@@ -32,10 +32,10 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear orthogonal;
-    laplacian(nu,U) Gauss linear orthogonal;
-    laplacian((1|A(U)),p) Gauss linear orthogonal;
-    laplacian(diffusivity,cellMotionU) Gauss linear orthogonal;
+    default         Gauss linear corrected;
+    laplacian(nu,U) Gauss linear corrected;
+    laplacian((1|A(U)),p) Gauss linear corrected;
+    laplacian(diffusivity,cellMotionU) Gauss linear corrected;
 }
 
 interpolationSchemes

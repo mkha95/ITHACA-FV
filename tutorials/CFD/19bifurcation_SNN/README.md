@@ -14,10 +14,40 @@ execute the command:
 
 
 ### 1. Prerequisites
-Install **ITHACA-FV** using the instruction in  (http://mathlab.github.io/ITHACA-FV/).
+- Install **ITHACA-FV** using the instruction in  (http://mathlab.github.io/ITHACA-FV/).
 Move to the main ITHACA-FV folder and source the bashrc file as follow:
 ```
 source etc/bashrc
+```
+
+
+### 2. Running the test case
+This tutorial uses a shared library which is not compiled during the
+installation of ITHACA-FV. In order to compile it move to the ITHACA_BIF folder
+and run:
+```
+wmake
+```
+This will create a shared libray object which will be stored in $(FOAM_USER_LIBBIN)
+
+After having compiled the library, one needs to compile the executable for the
+test case, this can be done again with:
+
+```
+wmake
+```
+
+After having executed the former command an executable called
+bifurcationNSS.exe will be created in the current directory. In order to run
+the case you run:
+```
+./Allrun
+```
+
+In order to clean up the directory and removing the output data you can run:
+
+```
+./Allclean
 ```
 
 ### 2.  Important files and folders:
@@ -31,20 +61,17 @@ Example of usage
 ./mesh.sh coarse
 ```
 
-
 - system folder: contains all the dictionary necessary to run the case, in
 particular:
-           BIFURCATIONdict: needed to set all the user defined bifurcation
-           parameters
-
-           ITHACAdict: containing information about the POD phase
+* [**BIFURCATION**]needed to set all the user defined bifurcation parameters
+* [**ITHACAdict**] containing information about the POD phase
 -ITHACAoutput: provided all the relevant ouputs of the program run, in
 particular one can find the following subdirectoris:
-           Offline: which will contain the fields computed for the FOM problem
-           during the offline phase
-
-           Online: which will contain the fields computed for the ROM problem
-           during the online phase
+* [**Offline**] which will contain the fields computed for the ROM problem during the online phase
+* [**Online**] which will contain the fields computed for the ROM problem during the online phase
+* [**POD**] containing information about the POD phase
+-ITHACA_BIF: folder containing the files needed to compile the ITHACA_BIF
+shared library which will be stored in $(FOAM_USER_LIBBIN)
 
 
 

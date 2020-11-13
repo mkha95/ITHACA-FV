@@ -17,14 +17,15 @@ FoamFile
 
 
 
-N_mu 7;
+N_mu 51;
 mu_inf 2;
 mu_sup 0.5;
-x_cord 20;
-y_cord 1.25;
+x_cord 12;
+y_cord 1.35;
 field velocity;
 component y;
 
 
 lift snapshot;
+parabolic_inlet true;
 par_coefs (-20 50 0);

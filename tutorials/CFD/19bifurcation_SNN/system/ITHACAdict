@@ -18,19 +18,19 @@ FoamFile
 EigenSolver eigen;
 
 // Number of modes to output and to use for projection
-NmodesUout 4;
+NmodesUout 50;
 NmodesUproj 4;
-NmodesPout 5;
-NmodesPproj 5;
-NmodesSUPout 5;
-NmodesSUPproj 5;
+NmodesPout 50;
+NmodesPproj 4;
+NmodesSUPout 50;
+NmodesSUPproj 4;
 
 // Output format to save market vectors.
 OutPrecision 20;
 OutType fixed;
 
 // Specific problem of a stationary case
-tolerance 1e-5;
+tolerance 1e-8;
 
 // Export Reduced Matrices
 exportPython 1;
@@ -49,3 +49,4 @@ normalizationNorm L2;
 maxIter 200000;
 
 middleExport false;
+online yes;
