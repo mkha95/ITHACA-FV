@@ -1,0 +1,17 @@
+name: Docker
+
+on:
+  push:
+    branches: [ MoaadPR ]
+
+jobs:
+  docker-arm64:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Running docker container with openfoam
+        run : docker run -ti --rm -v "$PWD/ITHACA-FV/:/root"\
+          --security-opt seccomp=unconfined opencfd/openfoam2106-dev
