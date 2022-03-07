@@ -13,5 +13,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Running docker container with openfoam
-        run : docker run -ti --rm -v "$PWD/ITHACA-FV/:/root"\
-          --security-opt seccomp=unconfined opencfd/openfoam2106-dev
+        run : docker run --rm -v "$PWD/ITHACA-FV/:/root"\
+          --security-opt seccomp=unconfined opencfd/openfoam2106-dev\
+          /root/uniTtests/gtest/script.sh
+
