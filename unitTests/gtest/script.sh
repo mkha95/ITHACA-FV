@@ -12,6 +12,7 @@ cmake ..              && \
 make && \
 sudo make install &&
 export GTEST_DIR='/usr/local/lib' &&  \
+cd ../.. && \
 wmake  && \
 ./test_all.exe ;
 
